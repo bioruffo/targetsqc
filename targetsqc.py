@@ -182,7 +182,9 @@ class NGSData(object):
         print("Loading data from:", str(self.wannovar))
         self.data = pd.read_csv(self.wannovar)
         print("Performing selection of variants in the desired genes...")
-        self.selected = self.data[self.data["Gene.refgene"].isin(self.genes.genes_ex)]
+        self.selected = self.data[[any(x in self.genes.genes_ex for x in \
+                                   genes.split(',')) if type(genes) == str else False \
+                                   for genes in self.data["Gene.refgene"]]]
         print("Saving variants from selected genes to:", output)
         self.selected.to_csv(output, index=False)
         
