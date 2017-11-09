@@ -1,0 +1,68 @@
+<tool id="targetsqc"
+      name="targetsqc"
+      version="1.0.0b1"
+      profile="16.04">
+  <description> A coverage analysis tool for data obtained from
+    amplicon-based exome sequencing</description>
+  <version_command>
+    python3 $__tool_directory__/targetsqc.py -v
+  </version_command>
+  <command>
+     <![CDATA[
+    ln -s '${bamfile}' ${sample}.bam &&
+    ln -s '${bamfile.metadata.bam_index}' ${sample}.bam.bai &&
+    python3 $__tool_directory__/targetsqc.py --sample-name $sample
+    --target $target --wannovar $wannovar --annotation $annotation
+    --genelist $genelist --bamfile ${sample}.bam --platform $adv.platform
+    --quality $adv.quality --min-mapping-qv $adv.min_mapping_qv
+    --min-failed-size $adv.min_failed_size --over $adv.over --outdir . &&
+    mv ./selector_report_${sample}.tsv $selector_report &&
+    mv ./selector_output_${sample}.csv $selector_output &&
+    mv ./selector_genes_${sample}.bed $selector_genes &&
+    mv ./selector_failed_${sample}.bed $selector_failed
+     ]]>
+  </command>
+  <inputs>
+    <param name="sample" type="text"
+      label="sample name" value="unnamed"/>
+    <param name="bamfile" type="data" format="bam"
+      label="alignment file"/>
+    <param name="target" type="data" format="bed"
+      label="ampliseq targets"/>
+    <param name="wannovar" type="data" format="csv"
+      label="variant annotation"/>
+    <param name="annotation" type="data" format="gff3"
+      label="genome annotation"/>
+    <param name="genelist" type="data" format="txt"
+      help="list of genes of interest" label="list of genes"/>
+    <section name="adv" title="Advanced Options" expanded="False">
+      <param name="platform" type="select" label="sequencing platform">
+        <option value="Proton" selected="true">Proton</option>
+        <option value="PGM">PGM</option>
+      </param>
+      <param name="quality" type="select" label="quality filter">
+        <option value="0">hotspot</option>
+        <option value="1" selected="true">indel</option>
+        <option value="2">mnp</option>
+        <option value="3">snp</option>
+        <option value="4">custom</option>
+      </param>
+      <param name="min_mapping_qv" type="integer" value="4"
+        label="min mapping"/>
+      <param name="min_failed_size" type="integer" value="2"
+        label="min failed size"/>
+      <param name="over" type="integer" value="10"
+        help="add this many nucleotides on each side of exons and CDS"/>
+    </section>
+  </inputs>
+  <outputs>
+    <data format="tsv" name="selector_report"
+      label="${tool.name} report on ${sample.value}"/>
+    <data format="csv" name="selector_output"
+      label="${tool.name} output on ${sample.value}"/>
+    <data format="bed" name="selector_genes"
+      label="${tool.name} gene selection on ${sample.value}"/>
+    <data format="bed" name="selector_failed"
+      label="${tool.name} failed regions on ${sample.value}"/>
+  </outputs>
+</tool>
