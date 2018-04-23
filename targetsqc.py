@@ -223,12 +223,22 @@ class NGSData(object):
 
 
     def select(self, output = "selector_output.csv"):
+        global out
+        out = self
         print("Loading data from:", str(self.wannovar))
         self.data = pd.read_csv(self.wannovar)
+        # Compatibility fix to accept both old wANNOVAR column label "Gene.refgene"
+        # and the new label "Gene.RefGene"
+        try:
+            genenamecol = [colname for colname in self.data.columns.values \
+                           if colname.lower() == 'gene.refgene'][0]
+        except IndexError:
+            print("### WARNING ### Could not identify gene names column in wANNOVAR.")
+            raise
         print("Performing selection of variants in the desired genes...")
         self.selected = self.data[[any(x in self.genes.genes_ex for x in \
                                    genes.split(',')) if type(genes) == str else False \
-                                   for genes in self.data["Gene.refgene"]]]
+                                   for genes in self.data[genenamecol]]]
         print("Saving variants from selected genes to:", output)
         self.selected.to_csv(output, index=False)
 
