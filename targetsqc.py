@@ -479,9 +479,9 @@ def main():
     genesbed = "{}/selector_genes_{}.bed".format(outdir, suffix)
     failedbed = "{}/selector_failed_{}.bed".format(outdir, suffix)
 
-    custom_min_coverage = 6
-    custom_min_cov_each_strand = 3
-    custom_strand_bias = 0.95
+    custom_min_coverage = 20
+    custom_min_cov_each_strand = 5
+    custom_strand_bias = 0.9
 
     if platform == "Proton":
         # Yeah against PEP8, shoot me
