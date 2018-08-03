@@ -387,9 +387,12 @@ def report(bam, run_params, genes, data,
                     to_write = to_write + '\t' + interval_to_str(c, s, e)
                     for reason in ['min_cov_each_strand', 'min_coverage', 'strand_bias']:
                         to_write = to_write +'\t'+['', reason][reason in re]
-                    for location in ["3'-splice", "5'-splice", "CDS", "intron"]:
-                        to_write = to_write +'\t'+['', location][location in loc]
-                    to_write = to_write + '\n'
+                    no_interest = True
+                    for location in ["3'-splice", "5'-splice", "CDS"]:
+                        if location in loc:
+                            no_interest = False
+                        to_write = to_write +'\t'+[' ', location][location in loc]
+                    to_write = to_write +'\t'+[' ', 'intron-only'][no_interest and "intron" in loc] + '\n'
                     r.write(to_write)
                     f.write("{}\t{}\t{}\t{}\t{}\n".format(c, s, e, '-'.join(re), n))
 
