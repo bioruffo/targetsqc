@@ -368,9 +368,10 @@ def report(bam, run_params, genes, data,
 
             if missing:
                 r.write("WARNING:\nThese CDS regions had no amplicons:\n")
-                r.write("\tGene\tChrom\tStart\tEnd\tExtension\n")
+                r.write("\tGene\tChr\tStart\tEnd\tExtension\tString\n")
                 for miss in missing:
-                    r.write('\t' + '\t'.join(miss) + '\n')
+                    n, c, s, e, ex, *_ = miss
+                    r.write('\t' + '\t'.join([n, c, s, e, ex, interval_to_str(c, s, e)+'\n']))
                     n, c, s, e, *_ = miss
                     f.write("{}\t{}\t{}\tmissing\t{}\n".format(c, s, e, n))
                 r.write('\n')
@@ -379,14 +380,25 @@ def report(bam, run_params, genes, data,
 
             if failedlist:
                 r.write("WARNING:\nSome amplicons had low coverage:\n\n")
-                r.write("\tGene\tChrom\tStart\tEnd\tExtension\tReason\tLocation\n")
+                r.write("\tGene\tChrom\tStart\tEnd\tExtension\tString\tReasons\t \t \tLocations\t \t \t \n")
                 for item in failedlist:
-                    n, c, s, e, ex, re, *_,  = item
-                    r.write(((7*'\t{}')+'\n').format(*item[:-2], ', '.join(item[-2]), ', '.join(item[-1])))
+                    n, c, s, e, ex, re, loc, *_ = item
+                    to_write = ((5*'\t{}')).format(*item[:-2])
+                    to_write = to_write + '\t' + interval_to_str(c, s, e)
+                    for reason in ['min_cov_each_strand', 'min_coverage', 'strand_bias']:
+                        to_write = to_write +'\t'+['', reason][reason in re]
+                    for location in ["3'-splice", "5'-splice", "CDS", "intron"]:
+                        to_write = to_write +'\t'+['', location][location in loc]
+                    to_write = to_write + '\n'
+                    r.write(to_write)
                     f.write("{}\t{}\t{}\t{}\t{}\n".format(c, s, e, '-'.join(re), n))
 
             else:
                 r.write("All positions had sufficient coverage.")
+
+
+def interval_to_str(c, s, e):
+    return c + ':' + str(s) + '-' + str(e)
 
 
 def set_boundaries(tpls, over):
