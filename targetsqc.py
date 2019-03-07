@@ -358,12 +358,12 @@ def report(bam, run_params, genes, data,
                         "Minimum mapping QV\t"+str(min_mapping_qv),
                         "Minimum failed region size\t"+str(min_failed_size)])))
 
-            r.write("Genes of interest:\nExome name\tAnnotation name\tExome check\tAnnotation check\n")
+            r.write("Genes of interest:\nAnnotation name\tExome name\tExome check\tAnnotation check\n")
             for gene in genes.genes_ex_input:
-                r.write('\t'.join([gene,
-                                   genes.bridge(gene),
-                                   ["", "Exome: not found"][gene in genes.notfound_bed],
-                                   ["", "Annotation: not found", ""][gene in genes.notfound_transc]]) \
+                r.write('\t'.join([genes.bridge(gene),
+                                   gene,
+                                   ["", "Annotation: not found", ""][gene in genes.notfound_transc]]),
+                                   ["", "Exome: not found"][gene in genes.notfound_bed] \
                         + '\n')
 
             if missing:
