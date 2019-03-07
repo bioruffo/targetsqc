@@ -26,13 +26,13 @@
     <param name="sample" type="text"
       label="sample name" value="unnamed"/>
     <param name="bamfile" type="data" format="bam"
-      label="alignment file"/>
+      help="Aligned sequencing reads as BAM file" label="alignment file"/>
     <param name="target" type="data" format="bed"
-      label="ampliseq targets"/>
+      help="BED file containing the amplicon target regions" label="ampliseq targets"/>
     <param name="wannovar" type="data" format="csv"
-      label="variant annotation"/>
+      help="wANNOVAR variant annotation file" label="variant annotation"/>
     <param name="annotation" type="data" format="gff3"
-      label="genome annotation"/>
+      help = "Annotated genome as gff3 file" label="genome annotation"/>
     <param name="genelist" type="data" format="txt"
       help="list of genes of interest" label="list of genes"/>
     <section name="adv" title="Advanced Options" expanded="False">
