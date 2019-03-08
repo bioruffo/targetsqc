@@ -141,7 +141,7 @@ class Genedata(object):
     def load_transcripts(self, annot_genes):
         print("Reading transcript CDSs from genome annotation...")
         transcripts = pd.read_csv(annot_genes, sep='\t',
-                comment="#", header=None, usecols=[0, 2, 3, 4, 8]) # TODO see if this works
+                comment="#", header=None, usecols=[0, 2, 3, 4, 8], engine=python') # TODO see if this works
         # Using only NC_ contigs
         transcripts = transcripts[transcripts[0].str.startswith("NC_")]
         #  no pseudogenes
