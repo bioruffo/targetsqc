@@ -361,7 +361,7 @@ def report(bam, run_params, genes, data,
             r.write("Genes of interest:\nAnnotation name\tExome name\tAnnotation check\tExome check\n")
             for gene in genes.genes_ex_input:
                 r.write('\t'.join([genes.bridge(gene),
-                                   gene,
+                                   [gene, ''][gene==genes.bridge(gene)],
                                    ["", "Annotation: not found", ""][gene in genes.notfound_transc],
                                    ["", "Exome: not found"][gene in genes.notfound_bed]]) \
                         + '\n')
