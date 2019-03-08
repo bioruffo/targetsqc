@@ -72,6 +72,9 @@ def parse_cmd():
 
 
 class Genedata(object):
+    
+    genes_pattern = '[\w_\-]*?'
+    
     def __init__(self, genesfile, bedfile, annot_genes, over, bedout):
         # Load desired gene names from .txt file
         # self.genes_ex = user-declared gene names to search the exome .bed file
@@ -126,7 +129,7 @@ class Genedata(object):
         print("Reading amplicons from bed file...")
         amplicons = pd.read_csv(bedfile, sep='\t', header=None, skiprows=1)
 
-        amplicons['gene'] = amplicons[7].str.extract("GENE_ID=(\w*?);",
+        amplicons['gene'] = amplicons[7].str.extract("GENE_ID=("+self.genes_pattern+")\;",
                  expand=False)
         amplicons = amplicons[[0, 1, 2, 3, 'gene']]
         amplicons = amplicons[amplicons['gene'].isin(self.genes_ex)]
@@ -141,7 +144,7 @@ class Genedata(object):
     def load_transcripts(self, annot_genes):
         print("Reading transcript CDSs from genome annotation...")
         transcripts = pd.read_csv(annot_genes, sep='\t',
-                comment="#", header=None, usecols=[0, 2, 3, 4, 8], engine=python') # TODO see if this works
+                comment="#", header=None, usecols=[0, 2, 3, 4, 8], engine='python') # TODO see if this works
         # Using only NC_ contigs
         transcripts = transcripts[transcripts[0].str.startswith("NC_")]
         #  no pseudogenes
@@ -149,16 +152,16 @@ class Genedata(object):
         # Using transcript rows, not 'gene'
         transcripts = transcripts[transcripts[2].isin(['exon', 'CDS'])]
         transcripts = transcripts.drop_duplicates()
-        transcripts['gene'] = transcripts[8].str.extract("\;gene=(\w*?)\;",
+        transcripts['gene'] = transcripts[8].str.extract("\;gene=("+self.genes_pattern+")\;",
                 expand=False)
 
         transcripts = transcripts[transcripts['gene'].isin(self.genes_ann)]
 
         notfound_transc = set(self.genes_ann).difference(set(transcripts['gene']))
         if notfound_transc:
-            print("I couldn't locate these {} genes within the transcripts file" \
-                  "(see report):\n{}".format(len(notfound_transc), ', '.join( \
-                   sorted(list(notfound_transc)))))
+            print("I couldn't locate these {} genes within the transcripts file,\n" \
+                  "NC contigs only, no pseudogenes (see report):\n{}".format(\
+                  len(notfound_transc), ', '.join(sorted(list(notfound_transc)))))
         return transcripts, notfound_transc
 
     def get_annot_genenames(self, annot_genes):
