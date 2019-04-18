@@ -17,7 +17,7 @@ targetsqc is currently in **early alpha version**.
 2 . Required data files:  
  
  * Annotated genome data, in gff3 format, of the same version used for read alignment and variant calling. E.g. [GRCh37](ftp://ftp.ncbi.nlm.nih.gov/genomes/H_sapiens/GRCh37.p13_interim_annotation/interim_GRCh37.p13_top_level_2017-01-13.gff3.gz) (unpack the archive for use)  
- * BED file containing the targets list (AmpliseqExome.<...>.designed.bed). For IonTorrent sequencers, this file can be downloaded from the IonTorrent Server in Configurations > References > Target Regions (\<your server\>/configure/references/#target-regions).  
+ * BED file containing the targets list (AmpliseqExome.<...>.designed.bed). For IonTorrent sequencers, this file can be downloaded from the IonTorrent Server in Configurations > References > Target Regions (\<your server>/configure/references/#target-regions).  
   
 3 . Download or clone the source code for targetsqc. The Python module can be ran directly from source.  
 
@@ -34,7 +34,6 @@ python targetsqc.py  --bamfile <your_sample_bam_file>
     --genelist <list_of_genes_of_interest>  
 ~~~~
 
-
 # Structure of the "genes of interest" file #
 Genes of interest should be stored in a text file, one gene name per line.  
 Lines can be commented out using the hash symbol (`#`).  
@@ -42,8 +41,7 @@ Lines can be commented out using the hash symbol (`#`).
 When the gene name *in the gff3 genome annotation file* and gene name *in the Ampliseq BED file* are different, both gene names must be specified in a single line, separated by a tab.  
 `GENOME_NAME <tab> AMPLISEQ_EXOME_NAME`  
 
-# Output files #  
-
+# Output files #
 targetsqc returns the following files:  
 
 1 . "targetsqc_report_<...>.tsv"  
@@ -52,7 +50,7 @@ The purpose of this file is to allow the user to verify a selection of CDS regio
 * The first section informs the parameters used for the analysis.
 * The second section lists the genes of interest, as parsed by the script. Two columns, "Annotation check" and "Exome check" are used to notify about gene names that were not found either in the `gff3` file or the Ampliseq Exome `designed.bed` file.  
   We suggest determining correct gene names by loading the `designed.bed`file on [IGV](https://software.broadinstitute.org/software/igv/) and verifying target names at the locus of interest.  
-  _Please note that if a gene is indicated as not found in this list, it is considered missing and will not be processed further!_  
+  _Please note that if a gene is indicated as not found in this list, it is considered missing and will not be processed further_!  
 * The third section, starting with "These CDS regions had no amplicons:", indicates any region for which there is _no amplicon designed_ in the Exome panel.  
   _Please note that if a region is indicated as not found in this list, it is considered missing and will not be processed further!_  
 * The fourth and last section, starting with "Some amplicons had low coverage:", lists any region where the parameters "min_coverage", "min_cov_each_strand", and "strand_bias" fall below the quality threshold.  
