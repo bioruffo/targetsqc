@@ -225,7 +225,7 @@ class NGSData(object):
         self.bam = pysam.AlignmentFile(bamfile, "rb")
 
 
-    def select(self, output = "selector_output.csv"):
+    def select(self, output = "targetsqc_output.csv"):
         global out
         out = self
         print("Loading data from:", str(self.wannovar))
@@ -323,8 +323,8 @@ class NGSData(object):
 
 
 def report(bam, run_params, genes, data,
-           reportfile = "selector_report.tsv",
-           failedbed = "selector_failed.bed"):
+           reportfile = "targetsqc_report.tsv",
+           failedbed = "targetsqc_failed.bed"):
     reportfile = reportfile
     min_mapping_qv, min_coverage, min_cov_each_strand, \
                   strand_bias, min_failed_size, over = run_params
@@ -492,10 +492,10 @@ def main():
 
     createdir(outdir)
     # Output file names
-    reportfile = "{}/selector_report_{}.tsv".format(outdir, suffix)
-    selectfile = "{}/selector_output_{}.csv".format(outdir, suffix)
-    genesbed = "{}/selector_genes_{}.bed".format(outdir, suffix)
-    failedbed = "{}/selector_failed_{}.bed".format(outdir, suffix)
+    reportfile = "{}/targetsqc_report_{}.tsv".format(outdir, suffix)
+    selectfile = "{}/targetsqc_output_{}.csv".format(outdir, suffix)
+    genesbed = "{}/targetsqc_genes_{}.bed".format(outdir, suffix)
+    failedbed = "{}/targetsqc_failed_{}.bed".format(outdir, suffix)
 
     custom_min_coverage = 20
     custom_min_cov_each_strand = 5
