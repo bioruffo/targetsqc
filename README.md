@@ -47,13 +47,18 @@ targetsqc returns the following files:
 1 . "targetsqc_report_<...>.tsv"  
 Tab-separated file containing coverage information.  
 The purpose of this file is to allow the user to verify a selection of CDS regions with no amplicons, and possibly failed regions, on [IGV](https://software.broadinstitute.org/software/igv/).  
-* The first section informs the parameters used for the analysis.
+
+* The first section informs the parameters used for the analysis.  
+
 * The second section lists the genes of interest, as parsed by the script. Two columns, "Annotation check" and "Exome check" are used to notify about gene names that were not found either in the `gff3` file or the Ampliseq Exome `designed.bed` file.  
   We suggest determining correct gene names by loading the `designed.bed`file on [IGV](https://software.broadinstitute.org/software/igv/) and verifying target names at the locus of interest.  
   _Please note that if a gene is indicated as not found in this list, it is considered missing and will not be processed further_!  
+  
 * The third section, starting with "These CDS regions had no amplicons:", indicates any region for which there is _no amplicon designed_ in the Exome panel.  
   _Please note that if a region is indicated as not found in this list, it is considered missing and will not be processed further!_  
+  
 * The fourth and last section, starting with "Some amplicons had low coverage:", lists any region where the parameters "min_coverage", "min_cov_each_strand", and "strand_bias" fall below the quality threshold.  
+
 
 2 . "targetsqc_output_<...>.csv"  
 Comma-separated (wANNOVAR-style) selection of variants located within the genes of interest.  
