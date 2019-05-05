@@ -369,7 +369,8 @@ def report(bam, run_params, genes, data,
                                    ["", "Annotation: not found", ""][gene in genes.notfound_transc],
                                    ["", "Exome: not found"][gene in genes.notfound_bed]]) \
                         + '\n')
-
+            r.write('\n')
+            
             if missing:
                 r.write("WARNING:\nThese CDS regions had no amplicons:\n")
                 r.write("\tGene\tChr\tStart\tEnd\tExtension\tString\n")
