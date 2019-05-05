@@ -128,8 +128,9 @@ class Genedata(object):
     def load_amplicons(self, bedfile):
         print("Reading amplicons from bed file...")
         amplicons = pd.read_csv(bedfile, sep='\t', header=None, skiprows=1)
-
-        amplicons['gene'] = amplicons[7].str.extract("GENE_ID=("+self.genes_pattern+")\;",
+        gene_location = [type(x)==str and x.startswith("GENE_ID") \
+                         for x in amplicons.iloc[[0]].values.tolist()[0]].index(True)
+        amplicons['gene'] = amplicons[gene_location].str.extract("GENE_ID=("+self.genes_pattern+")\;",
                  expand=False)
         amplicons = amplicons[[0, 1, 2, 3, 'gene']]
         amplicons = amplicons[amplicons['gene'].isin(self.genes_ex)]
