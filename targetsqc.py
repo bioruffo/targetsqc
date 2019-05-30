@@ -33,21 +33,18 @@ def parse_cmd():
                         help='alignment filename (BAM format)')
     parser.add_argument('-t', '--target', type=str, required=True,
                         help='ampliseq targets filename (BED format)')
-    parser.add_argument('-w', '--wannovar', type=str, required=True,
-                        help='variant annotation filename (CSV format)')
     parser.add_argument('-a', '--annotation', type=str, required=True,
                         help='genome annotation file (GFF3 format)')
     parser.add_argument('-g', '--genelist', type=str, required=True,
                         help='list of genes of interest (text file).' +
                         ' One gene per line')
+    parser.add_argument('-w', '--wannovar', type=str,
+                        help='variant annotation filename (CSV format)')
+
     parser.add_argument('-p', '--platform', type=str,
                         nargs='?', default='Proton',
                         choices=set(('Proton', 'PGM')),
                         help='sequencing platform')
-    parser.add_argument('-s', '--select', type=bool,
-                        nargs='?', default=True,
-                        choices=set((True, False)),
-                        help='select variants that are within genelist?')
     parser.add_argument('-q', '--quality', type=int,
                         nargs='?', default=1,
                         choices=set((0, 1, 2, 3, 4)))
@@ -219,7 +216,7 @@ class Genedata(object):
 
 
 class NGSData(object):
-    def __init__(self, wannovarfile, bamfile, genes):
+    def __init__(self, bamfile, genes, wannovarfile = None):
         self.genes = genes
         self.wannovar = wannovarfile
         print("Reading coverage data from:", str(bamfile))
@@ -227,8 +224,9 @@ class NGSData(object):
 
 
     def select(self, output = "targetsqc_output.csv"):
-        global out
-        out = self
+        if self.wannovar is None:
+            print("No ANNOVAR file was provided for selection. Aborting.")
+            return
         print("Loading data from:", str(self.wannovar))
         self.data = pd.read_csv(self.wannovar)
         # Compatibility fix to accept both old wANNOVAR column label "Gene.refgene"
@@ -490,7 +488,6 @@ def main():
     wannovar = opts.wannovar
     annotation = opts.annotation
     genes = opts.genelist
-    select = opts.select
 
     createdir(outdir)
     # Output file names
@@ -527,10 +524,10 @@ def main():
         genes = oldgenes
         print("Using previously calculated `genes` data.")
 
-    data = NGSData(wannovar, bam, genes)
+    data = NGSData(bam, genes, wannovar)
 
     report(bam, run_params, genes, data, reportfile, failedbed) # TODO add "over"
-    if select:
+    if wannovar:
         data.select(output=selectfile)
 
     print("End.")
