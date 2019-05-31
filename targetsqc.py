@@ -389,8 +389,8 @@ def report(bam, run_params, genes, data,
                                    ["ok", "Annotation: not found"][genes.bridge(gene) in genes.notfound_transc],
                                    ["ok", "Exome: not found"][gene in genes.notfound_bed],
                                    str(total_cds),
-                                   '{}% [{}]'.format(flrdownpc(missing_cds, total_cds), missing_cds),
-                                   '{}% [{}]'.format(flrdownpc(failed_cds, total_cds), failed_cds)]) \
+                                   '{}%'.format(flrdownpc(missing_cds, total_cds)),
+                                   '{}%'.format(flrdownpc(failed_cds, total_cds))]) \
                         + '\n')
             r.write('\n')
             
