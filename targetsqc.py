@@ -377,8 +377,8 @@ def report(bam, run_params, genes, data,
                 else:
                     total_cds = 0
                 if total_cds == 0:
-                    missing_cds = 1
-                    failed_cds = 1
+                    missing_cds = 0
+                    failed_cds = 0
                 else:
                     missing_cds = failcds[gene][('missingCDS',)]
                     failed_cds = missing_cds + \
