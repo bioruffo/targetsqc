@@ -370,14 +370,13 @@ def report(bam, run_params, genes, data,
                         "Minimum failed region size\t"+str(min_failed_size)])))
 
             r.write("Genes of interest:\nAnnotation name\tExome name\tAnnotation check" + \
-                    "\tExome check\tTotal CDS\tCDS covered\tCDS effective (min_coverage)\n")
+                    "\tExome check\tTotal CDS\tCDS covered\tEffectively covered CDS by min_coverage\n")
             for gene in genes.genes_ex_input:
                 if gene in genes.data.keys():
                     total_cds = tuplesum(genes.data[gene]['CDS'])
                 else:
                     total_cds = 0
                 if total_cds == 0:
-                    total_cds = 1
                     missing_cds = 1
                     failed_cds = 1
                 else:
@@ -387,11 +386,11 @@ def report(bam, run_params, genes, data,
                                     if 'min_coverage' in key])
                 r.write('\t'.join([genes.bridge(gene),
                                    [gene, ''][gene==genes.bridge(gene)],
-                                   ["ok", "Annotation: not found", ""][gene in genes.notfound_transc],
+                                   ["ok", "Annotation: not found"][genes.bridge(gene) in genes.notfound_transc],
                                    ["ok", "Exome: not found"][gene in genes.notfound_bed],
                                    str(total_cds),
-                                   '{}% [{}]'.format(flrdownpc(1-missing_cds/total_cds), missing_cds),
-                                   '{}% [{}]'.format(flrdownpc(1-failed_cds/total_cds), failed_cds)]) \
+                                   '{}% [{}]'.format(flrdownpc(missing_cds, total_cds), missing_cds),
+                                   '{}% [{}]'.format(flrdownpc(failed_cds, total_cds), failed_cds)]) \
                         + '\n')
             r.write('\n')
             
@@ -433,8 +432,11 @@ def interval_to_str(c, s, e):
     return c + ':' + str(s) + '-' + str(e)
 
 
-def flrdownpc(number):
-    return math.floor(10000*number)/100
+def flrdownpc(num, den):
+    if den > 0:
+        return math.floor(10000*(1-num/den))/100
+    else:
+        return 0
 
 def set_boundaries(tpls, over):
     boundaries = dict()
