@@ -1,14 +1,11 @@
 # README #
 
 # What is targetsqc #
-
 targetsqc is a quality control tool that alerts about regions of low coverage and missing regions in amplicon-based exome sequencing. It can also filter an annotated VCF file (ANNOVAR format) based on the provided gene list.  
-
 targetsqc is currently in **early alpha version**.  
 
 
 # How to install targetsqc #
-
 1 . Requisites:  
 
  * Python 3.5+ (I suggest [Anaconda Python](https://www.continuum.io/downloads))  
@@ -22,7 +19,6 @@ targetsqc is currently in **early alpha version**.
 3 . Download or clone the source code for targetsqc. The Python module can be ran directly from source.  
 
 # Using targetsqc #
-
 targetsqc can be easily ran within a Galaxy instance.
 However, it can also be executed from the command line. The basic usage is:  
 
@@ -52,7 +48,8 @@ The purpose of this file is to allow the user to verify a selection of CDS regio
 
 * The second section lists the genes of interest, as parsed by the script. Two columns, "Annotation check" and "Exome check" are used to notify about gene names that were not found either in the `gff3` file or the Ampliseq Exome `designed.bed` file.  
   We suggest determining correct gene names by loading the `designed.bed`file on [IGV](https://software.broadinstitute.org/software/igv/) and verifying target names at the locus of interest.  
-  _Please note that if a gene is indicated as not found in this list, it is considered missing and will not be processed further_!  
+  _Please note that if a gene is indicated as not found in this list, it is considered missing and will not be processed further!_  
+  NEW: Columns will also indicate how much percent of the total CDS region is present in the amplicon panel ("% CDS within the panel") and is covered effectively ("% CDS covered >= {n} reads"). _Please remember that this script is offered as-is, with no guarantee of exactedness!_  
   
 * The third section, starting with "These CDS regions had no amplicons:", indicates any region for which there is _no amplicon designed_ in the Exome panel.  
   _Please note that if a region is indicated as not found in this list, it is considered missing and will not be processed further!_  
@@ -71,7 +68,9 @@ BED file showing all exonic regions considered for the analysis.
 BED file showing all regions that failed to pass the quality thresholds.
 
 # LICENSE #
-
 **targetsqc is offered under the GNU General Public License.**  
 **Please read it here: https://www.gnu.org/copyleft/gpl.html**  
+
+# DISCLAIMER #
+_**targetsqc is tested at the best of our knowledge but is offered as-is, with no guarantee of exactness.**_
 
