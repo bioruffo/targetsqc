@@ -369,8 +369,10 @@ def report(bam, run_params, genes, data,
                         "Minimum mapping QV\t"+str(min_mapping_qv),
                         "Minimum failed region size\t"+str(min_failed_size)])))
 
-            r.write("Genes of interest:\nAnnotation name\tExome name\tAnnotation check" + \
-                    "\tExome check\tTotal CDS\tCDS covered\tEffectively covered CDS by min_coverage\n")
+            r.write("Genes of interest:\n" + \
+                    "Gene name\t% CDS within the panel\t% CDS covered >= {} reads\t".format(min_coverage) + \
+                    "Annotation name\tExome name\tAnnotation check" + \
+                    "\tExome check\tTotal CDS\tCDS within the panel\tCDS effectively covered\n")
             for gene in genes.genes_ex_input:
                 if gene in genes.data.keys():
                     total_cds = tuplesum(genes.data[gene]['CDS'])
@@ -384,13 +386,25 @@ def report(bam, run_params, genes, data,
                     failed_cds = missing_cds + \
                             sum([value for key, value in failcds[gene].items() \
                                     if 'min_coverage' in key])
-                r.write('\t'.join([genes.bridge(gene),
-                                   [gene, ''][gene==genes.bridge(gene)],
-                                   ["ok", "Annotation: not found"][genes.bridge(gene) in genes.notfound_transc],
-                                   ["ok", "Exome: not found"][gene in genes.notfound_bed],
-                                   str(total_cds),
+                r.write('\t'.join([genes.bridge(gene), # name
+                                   # % in panel
                                    '{}%'.format(flrdownpc(missing_cds, total_cds)),
-                                   '{}%'.format(flrdownpc(failed_cds, total_cds))]) \
+                                    # % effectively covered
+                                   '{}%'.format(flrdownpc(failed_cds, total_cds)),
+                                    # name
+                                   genes.bridge(gene),
+                                    # exome name if different
+                                   [gene, ''][gene==genes.bridge(gene)],
+                                   # name check
+                                   ["ok", "Annotation: not found"][genes.bridge(gene) in genes.notfound_transc],
+                                   # exome name check
+                                   ["ok", "Exome: not found"][gene in genes.notfound_bed],
+                                   # Total number of nucleotides in CDS
+                                   str(total_cds),
+                                   # number of CDS nucleotides not in panel
+                                   str(missing_cds),
+                                   # number of CDS nucleotides not effectively covered
+                                   str(failed_cds)]) \
                         + '\n')
             r.write('\n')
             
