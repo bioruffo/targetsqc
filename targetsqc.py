@@ -4,6 +4,9 @@
 Created on Tue Feb 21 14:39:58 2017
 
 @author: roberto
+
+Warning - This script is offered as-is with no guarantee of exactedness.
+
 """
 
 # TODO REMEMBER CFTR-37!! The Ion Proton / PGM will trim primer sequences \
@@ -372,7 +375,7 @@ def report(bam, run_params, genes, data,
             r.write("Genes of interest:\n" + \
                     "Gene name\t% CDS within the panel\t% CDS covered >= {} reads\t".format(min_coverage) + \
                     "Annotation name\tExome name\tAnnotation check" + \
-                    "\tExome check\tTotal CDSnt\tCDS nt not in the panel\tCDS nt not effectively covered\n")
+                    "\tExome check\tTotal CDS nt\tCDS nt not in the panel\tCDS nt not effectively covered\n")
             for gene in genes.genes_ex_input:
                 if gene in genes.data.keys():
                     total_cds = tuplesum(genes.data[gene]['CDS'])
@@ -409,7 +412,7 @@ def report(bam, run_params, genes, data,
             r.write('\n')
             
             if missing:
-                r.write("WARNING:\nThese CDS regions had no amplicons:\n")
+                r.write("WARNING:\nThese CDS regions from identified genes had no amplicons:\n")
                 r.write("\tGene\tChr\tStart\tEnd\tExtension\tString\n")
                 for miss in missing:
                     n, c, s, e, ex, *_ = miss
@@ -418,10 +421,10 @@ def report(bam, run_params, genes, data,
                     f.write("{}\t{}\t{}\tmissing\t{}\n".format(c, s, e, n))
                 r.write('\n')
             else:
-                r.write("All CDS were represented by amplicons.\n\n")
+                r.write("All CDS from identified genes were represented by amplicons.\n\n")
 
             if failedlist:
-                r.write("WARNING:\nSome amplicons had low coverage:\n\n")
+                r.write("WARNING:\nSome amplicons from identified genes had low coverage:\n\n")
                 r.write("\tGene\tChrom\tStart\tEnd\tExtension\tString\tReasons\t \t \tLocations\t \t \t \n")
                 for item in failedlist:
                     n, c, s, e, ex, re, loc, *_ = item
