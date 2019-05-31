@@ -372,7 +372,7 @@ def report(bam, run_params, genes, data,
             r.write("Genes of interest:\n" + \
                     "Gene name\t% CDS within the panel\t% CDS covered >= {} reads\t".format(min_coverage) + \
                     "Annotation name\tExome name\tAnnotation check" + \
-                    "\tExome check\tTotal CDS\tCDS within the panel\tCDS effectively covered\n")
+                    "\tExome check\tTotal CDSnt\tCDS nt not in the panel\tCDS nt not effectively covered\n")
             for gene in genes.genes_ex_input:
                 if gene in genes.data.keys():
                     total_cds = tuplesum(genes.data[gene]['CDS'])
