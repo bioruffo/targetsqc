@@ -4,17 +4,15 @@
 Created on Tue Feb 21 14:39:58 2017
 
 @author: roberto
-
 """
 
-# TODO REMEMBER CFTR-37!! The Ion Proton / PGM will trim primer sequences
+# TODO REMEMBER CFTR-37!! The Ion Proton / PGM will trim primer sequences \
 # for variant analysis, but the BAM still contain these ends!! Don't count them!!
 # TIP: just employ TVC post-processed BAM
 
 
 import pandas as pd
 import pysam
-import csv
 import argparse
 from bisect import bisect
 from collections import defaultdict
@@ -55,7 +53,7 @@ def parse_cmd():
                         help='ignore 1-bp dels')
     parser.add_argument('-u', '--over', type=int,
                         nargs='?', default=10,
-                        help='add this many nucleotides on each side of exons' +
+                        help='add this many nucleotides on each side of exons' + \
                         ' and CDS')
     parser.add_argument('-o', '--outdir', type=str,
                         nargs='?', default='targetsqc_output',
@@ -126,9 +124,9 @@ class Genedata(object):
         print("Reading amplicons from bed file...")
         amplicons = pd.read_csv(bedfile, sep='\t', header=None, skiprows=1)
         gene_location = [type(x)==str and x.startswith("GENE_ID") \
-                         for x in amplicons.iloc[[0]].values.tolist()[0]].index(True)
+                for x in amplicons.iloc[[0]].values.tolist()[0]].index(True)
         amplicons['gene'] = amplicons[gene_location].str.extract("GENE_ID=("+self.genes_pattern+")\;",
-                 expand=False)
+                expand=False)
         amplicons = amplicons[[0, 1, 2, 3, 'gene']]
         amplicons = amplicons[amplicons['gene'].isin(self.genes_ex)]
 
@@ -249,7 +247,9 @@ class NGSData(object):
         min_mapping_qv, min_coverage, min_cov_each_strand, strand_bias, \
                 min_failed_size, over = run_params
         flattened = dict()
-        for item in ['CDS', 'exon', "5'-splice", "3'-splice"]:
+        failedcdscount = defaultdict(int)
+        notable_locations = ['CDS', 'exon', "5'-splice", "3'-splice"] # and 'intron'
+        for item in notable_locations:
             flattened[item] = flatten(self.genes.data[gene][item])
         covlist = []
         failedlist = []
@@ -280,6 +280,8 @@ class NGSData(object):
                     where = self.get_where(location, flattened)
                     rowdata.extend([(reason == []), reason, where])
                     if reason:
+                        if 'CDS' in where:
+                            failedcdscount[tuple(reason)] += 1
                         failedreasons.update(reason)
                         failedwhere.update(where)
                         if not failedchrom:
@@ -305,7 +307,7 @@ class NGSData(object):
                                        sorted(failedreasons), sorted(failedwhere)])
                 if failedlist[-1][4] < min_failed_size:
                     failedlist.pop(-1)
-        return covlist, failedlist
+        return covlist, failedlist, failedcdscount
 
     def get_where(self, location, flattened):
         where = []
@@ -324,18 +326,24 @@ class NGSData(object):
 def report(bam, run_params, genes, data,
            reportfile = "targetsqc_report.tsv",
            failedbed = "targetsqc_failed.bed"):
+    global failcds
     reportfile = reportfile
     min_mapping_qv, min_coverage, min_cov_each_strand, \
                   strand_bias, min_failed_size, over = run_params
     missing = []
     failedlist = []
+    failcds = defaultdict(int)
     for gene in genes.genes_ex:
+        failcds[gene] = dict()
         if gene not in genes.notfound_bed:
-            cov, fail = data.analyze_coverage(gene, run_params)
+            cov, fail, fcds = data.analyze_coverage(gene, run_params)
             failedlist.extend(fail)
+            failcds[gene] = fcds
         if genes.data[gene].get('missingCDS', None):
             for item in genes.data[gene]['missingCDS']:
-                missing.append([gene, genes.data[gene]['chr'], str(item[0]), str(item[1]), str(item[1]-item[0]+1)])
+                extension = item[1]-item[0]+1
+                missing.append([gene, genes.data[gene]['chr'], str(item[0]), str(item[1]), str(extension)])
+                failcds[gene]['missingCDS'] += extension # it's a defaultdict(int)
             # TODO "coverage" and "failed" can be used in a per-nt basis
             #covlist.extend(cov)
 
@@ -360,12 +368,28 @@ def report(bam, run_params, genes, data,
                         "Minimum mapping QV\t"+str(min_mapping_qv),
                         "Minimum failed region size\t"+str(min_failed_size)])))
 
-            r.write("Genes of interest:\nAnnotation name\tExome name\tAnnotation check\tExome check\n")
+            r.write("Genes of interest:\nAnnotation name\tExome name\tAnnotation check" + \
+                    "\tExome check\tCDS covered\tCDS effective (min_coverage)\n")
             for gene in genes.genes_ex_input:
+                if gene in genes.data.keys():
+                    total_cds = tuplesum(genes.data[gene]['CDS'])
+                else:
+                    total_cds = 0
+                if total_cds == 0:
+                    total_cds = 1
+                    missing_cds = 1
+                    failed_cds = 1
+                else:
+                    missing_cds = failcds[gene]['missingCDS']
+                    failed_cds = missing_cds + \
+                            sum([value for key, value in failcds[gene].items() \
+                                    if 'CDS' in key])
                 r.write('\t'.join([genes.bridge(gene),
                                    [gene, ''][gene==genes.bridge(gene)],
-                                   ["", "Annotation: not found", ""][gene in genes.notfound_transc],
-                                   ["", "Exome: not found"][gene in genes.notfound_bed]]) \
+                                   ["ok", "Annotation: not found", ""][gene in genes.notfound_transc],
+                                   ["ok", "Exome: not found"][gene in genes.notfound_bed],
+                                   '{:.1%}'.format(1-missing_cds/total_cds),
+                                   '{:.1%}'.format(1-failed_cds/total_cds)]) \
                         + '\n')
             r.write('\n')
             
@@ -434,6 +458,13 @@ def nttuple(dataframe, columns, minusone = False):
 
 def flatten(tuplelist):
     return [item for tpl in tuplelist for item in tpl]
+
+
+def tuplesum(tuplelist):
+    mysum = 0
+    for mytuple in tuplelist:
+        mysum += (mytuple[1]-mytuple[0])
+    return mysum
 
 
 def compare_tuplelists(query, reference):
