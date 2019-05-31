@@ -17,6 +17,7 @@ import argparse
 from bisect import bisect
 from collections import defaultdict
 from utils import createdir
+import math
 
 
 def parse_cmd():
@@ -196,7 +197,7 @@ class Genedata(object):
         for i, item in enumerate(["5'-splice", "3'-splice"]):
             splice = [sorted([s[i], s[i]+over*([-1, 1][i])]) for s in sel]
             self.data[gene][item] = set_boundaries(splice, 0)
-        self.data[gene]['missingCDS'] = compare_tuplelists(self.data[gene]['CDS'],
+        self.data[gene][('missingCDS',)] = compare_tuplelists(self.data[gene]['CDS'],
                  set_boundaries(nttuple(self.amplicons[self.amplicons['gene'] == gene], [1, 2]),
                                 over=0))
 
@@ -369,7 +370,7 @@ def report(bam, run_params, genes, data,
                         "Minimum failed region size\t"+str(min_failed_size)])))
 
             r.write("Genes of interest:\nAnnotation name\tExome name\tAnnotation check" + \
-                    "\tExome check\tCDS covered\tCDS effective (min_coverage)\n")
+                    "\tExome check\tTotal CDS\tCDS covered\tCDS effective (min_coverage)\n")
             for gene in genes.genes_ex_input:
                 if gene in genes.data.keys():
                     total_cds = tuplesum(genes.data[gene]['CDS'])
@@ -380,16 +381,17 @@ def report(bam, run_params, genes, data,
                     missing_cds = 1
                     failed_cds = 1
                 else:
-                    missing_cds = failcds[gene]['missingCDS']
+                    missing_cds = failcds[gene][('missingCDS',)]
                     failed_cds = missing_cds + \
                             sum([value for key, value in failcds[gene].items() \
-                                    if 'CDS' in key])
+                                    if 'min_coverage' in key])
                 r.write('\t'.join([genes.bridge(gene),
                                    [gene, ''][gene==genes.bridge(gene)],
                                    ["ok", "Annotation: not found", ""][gene in genes.notfound_transc],
                                    ["ok", "Exome: not found"][gene in genes.notfound_bed],
-                                   '{:.1%}'.format(1-missing_cds/total_cds),
-                                   '{:.1%}'.format(1-failed_cds/total_cds)]) \
+                                   str(total_cds),
+                                   '{}% [{}]'.format(flrdownpc(1-missing_cds/total_cds), missing_cds),
+                                   '{}% [{}]'.format(flrdownpc(1-failed_cds/total_cds), failed_cds)]) \
                         + '\n')
             r.write('\n')
             
@@ -430,6 +432,9 @@ def report(bam, run_params, genes, data,
 def interval_to_str(c, s, e):
     return c + ':' + str(s) + '-' + str(e)
 
+
+def flrdownpc(number):
+    return math.floor(10000*number)/100
 
 def set_boundaries(tpls, over):
     boundaries = dict()
