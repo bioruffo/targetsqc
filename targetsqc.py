@@ -200,7 +200,7 @@ class Genedata(object):
         for i, item in enumerate(["5'-splice", "3'-splice"]):
             splice = [sorted([s[i], s[i]+over*([-1, 1][i])]) for s in sel]
             self.data[gene][item] = set_boundaries(splice, 0)
-        self.data[gene][('missingCDS',)] = compare_tuplelists(self.data[gene]['CDS'],
+        self.data[gene]['missingCDS'] = compare_tuplelists(self.data[gene]['CDS'],
                  set_boundaries(nttuple(self.amplicons[self.amplicons['gene'] == gene], [1, 2]),
                                 over=0))
 
@@ -347,7 +347,7 @@ def report(bam, run_params, genes, data,
             for item in genes.data[gene]['missingCDS']:
                 extension = item[1]-item[0]+1
                 missing.append([gene, genes.data[gene]['chr'], str(item[0]), str(item[1]), str(extension)])
-                failcds[gene]['missingCDS'] += extension # it's a defaultdict(int)
+                failcds[gene][('missingCDS',)] += extension # it's a defaultdict(int)
             # TODO "coverage" and "failed" can be used in a per-nt basis
             #covlist.extend(cov)
 
